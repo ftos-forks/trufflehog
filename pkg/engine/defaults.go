@@ -231,8 +231,10 @@ import (
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/eightxeight"
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/elasticemail"
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/enablex"
+	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/endorlabs"
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/enigma"
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/envoyapikey"
+	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/eraser"
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/etherscan"
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/ethplorer"
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/eventbrite"
@@ -376,6 +378,8 @@ import (
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/kucoin"
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/kylas"
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/languagelayer"
+	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/larksuite"
+	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/larksuiteapikey"
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/launchdarkly"
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/ldap"
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/leadfeeder"
@@ -717,6 +721,7 @@ import (
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/twist"
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/twitch"
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/twitter"
+	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/twitterconsumerkey"
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/tyntec"
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/typeform"
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors/typetalk"
@@ -1606,6 +1611,11 @@ func DefaultDetectors() []detectors.Detector {
 		onfleet.Scanner{},
 		intra42.Scanner{},
 		groq.Scanner{},
+		twitterconsumerkey.Scanner{},
+		eraser.Scanner{},
+		larksuite.Scanner{},
+		larksuiteapikey.Scanner{},
+		endorlabs.Scanner{},
 	}
 }
 

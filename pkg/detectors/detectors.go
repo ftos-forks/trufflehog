@@ -38,6 +38,12 @@ type MaxSecretSizeProvider interface {
 	MaxSecretSize() int64
 }
 
+// StartOffsetProvider is an optional interface that a detector can implement to
+// provide a custom start offset for the secret it finds.
+type StartOffsetProvider interface {
+	StartOffset() int64
+}
+
 // MultiPartCredentialProvider is an optional interface that a detector can implement
 // to indicate its compatibility with multi-part credentials and provide the maximum
 // secret size for the credential it finds.
@@ -115,10 +121,17 @@ func unwrapToLast(err error) error {
 }
 
 type ResultWithMetadata struct {
+	// IsWordlistFalsePositive indicates whether this secret was flagged as a false positive based on a wordlist check
+	IsWordlistFalsePositive bool
 	// SourceMetadata contains source-specific contextual information.
 	SourceMetadata *source_metadatapb.MetaData
 	// SourceID is the ID of the source that the API uses to map secrets to specific sources.
 	SourceID sources.SourceID
+	// JobID is the ID of the job that the API uses to map secrets to specific jobs.
+	JobID sources.JobID
+	// SecretID is the ID of the secret, if it exists.
+	// Only secrets that are being reverified will have a SecretID.
+	SecretID int64
 	// SourceType is the type of Source.
 	SourceType sourcespb.SourceType
 	// SourceName is the name of the Source.
@@ -133,6 +146,8 @@ func CopyMetadata(chunk *sources.Chunk, result Result) ResultWithMetadata {
 	return ResultWithMetadata{
 		SourceMetadata: chunk.SourceMetadata,
 		SourceID:       chunk.SourceID,
+		JobID:          chunk.JobID,
+		SecretID:       chunk.SecretID,
 		SourceType:     chunk.SourceType,
 		SourceName:     chunk.SourceName,
 		Result:         result,

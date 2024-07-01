@@ -998,6 +998,11 @@ enum DetectorType {
   Onfleet = 986;
   Intra42 = 987;
   Groq = 988;
+  TwitterConsumerkey = 989;
+  Eraser = 990;
+  LarkSuite = 991;
+  LarkSuiteApiKey = 992;
+  EndorLabs = 993;
 }
 
 message Result {
