@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"strconv"
 	"time"
 
@@ -255,14 +256,19 @@ func checkResponseStatus(r *http.Response) error {
 
 // getPostmanResponseBodyBytes makes a request to the Postman API and returns the response body as bytes.
 func (c *Client) getPostmanResponseBodyBytes(ctx trContext.Context, urlString string, headers map[string]string) ([]byte, error) {
+	ctx = trContext.WithValues(ctx, "url", urlString)
+
 	req, err := c.NewRequest(urlString, headers)
 	if err != nil {
 		return nil, err
 	}
 
-	resp, err := c.HTTPClient.Do(req)
-	if err != nil {
-		return nil, err
+	resp, urlErr := c.HTTPClient.Do(req)
+	if urlErr != nil {
+		if urlErr.(*url.Error).Timeout() {
+			ctx.Logger().Error(urlErr, "postman API timed out.  Are we requesting an especially large item from the Postman API?")
+		}
+		return nil, urlErr
 	}
 	defer resp.Body.Close()
 
