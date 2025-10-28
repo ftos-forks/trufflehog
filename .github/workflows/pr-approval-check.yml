@@ -26,11 +26,11 @@ jobs:
             console.log(`Found ${reviews.length} reviews`);
             
             // Get approved reviews
-            const approvals = reviews.filter(review => review.state === 'APPROVED');
-            console.log(`Found ${approvals.length} approvals`);
+            const approvers = reviews.filter(review => review.state === 'APPROVED').map(a => a.user.login);
+            console.log(`Found ${approvers.length} approvers`);
             
-            if (approvals.length === 0) {
-              console.log('No approvals found');
+            if (approvers.length === 0) {
+              console.log('No approvers found');
               await github.rest.repos.createCommitStatus({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -58,9 +58,8 @@ jobs:
                   teamsToCheck.push(team.slug);
                 });
                 
-                console.log(`Teams to check: ${teamsToCheck.join(', ')}`);
               } catch (error) {
-                console.log('Error fetching child teams, will only check parent team:', error.message);
+                console.log('Error fetching child teams, will only check parent team:', error.status);
               }
               
               return teamsToCheck;
@@ -77,36 +76,24 @@ jobs:
                   });
                   
                   if (membership.state === 'active') {
-                    console.log(`✅ Found active member of @trufflesecurity/${teamSlug}: ${username}`);
-                    return { isMember: true, teamSlug };
+                    console.log(`✅ Found active member of @trufflesecurity/product-eng: ${username}`);
+                    return true;
                   }
                 } catch (error) {
-                  // User is not a member of this team (404) or other error
-                  console.log(`❌ ${username} is not a member of @trufflesecurity/${teamSlug}`);
+                  if (error.status !== 404) {
+                    console.error(`⚠️ Error checking membership for ${username} in @trufflesecurity team:`, error.status);
+                  }
                 }
               }
-              return { isMember: false, teamSlug: null };
+              return false;
             }
             
             // Get all teams to check (parent + children)
             const teamsToCheck = await getTeamsToCheck();
             
             // Check if any approver is a member of product-eng or its child teams
-            let hasProductEngApproval = false;
-            let approverInfo = null;
-            
-            for (const approval of approvals) {
-              const membershipCheck = await isUserMemberOfAnyTeam(approval.user.login, teamsToCheck);
-              
-              if (membershipCheck.isMember) {
-                hasProductEngApproval = true;
-                approverInfo = {
-                  username: approval.user.login,
-                  teamSlug: membershipCheck.teamSlug
-                };
-                break;
-              }
-            }
+            const approver = approvers.find(login => isUserMemberOfAnyTeam(login, teamsToCheck))
+            const hasProductEngApproval = approver != undefined;
             
             if (hasProductEngApproval) {
               await github.rest.repos.createCommitStatus({
@@ -115,7 +102,7 @@ jobs:
                 sha: context.payload.pull_request.head.sha,
                 state: 'success',
                 context: 'product-eng-approval',
-                description: `✅ Approved by @trufflesecurity/${approverInfo.teamSlug} member (${approverInfo.username})`
+                description: `✅ Approved by @trufflesecurity/product-eng team member (${approverInfo.username})`
               });
             } else {
               await github.rest.repos.createCommitStatus({
