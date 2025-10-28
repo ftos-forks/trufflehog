@@ -102,7 +102,7 @@ jobs:
                 sha: context.payload.pull_request.head.sha,
                 state: 'success',
                 context: 'product-eng-approval',
-                description: `✅ Approved by @trufflesecurity/product-eng team member (${approverInfo.username})`
+                description: `✅ Approved by @trufflesecurity/product-eng team member (${approver})`
               });
             } else {
               await github.rest.repos.createCommitStatus({
