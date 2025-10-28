@@ -90,10 +90,19 @@ jobs:
             
             // Get all teams to check (parent + children)
             const teamsToCheck = await getTeamsToCheck();
-            
-            // Check if any approver is a member of product-eng or its child teams
-            const approver = approvers.find(login => isUserMemberOfAnyTeam(login, teamsToCheck))
-            const hasProductEngApproval = approver != undefined;
+
+            let hasProductEngApproval = false;
+            let approverLogin = null;
+
+            for (const approver of approvers) {
+              const membershipCheck = await isUserMemberOfAnyTeam(approver, teamsToCheck);
+              
+              if (membershipCheck.isMember) {
+                hasProductEngApproval = true;
+                approverLogin = approver;
+                break;
+              }
+            }
             
             if (hasProductEngApproval) {
               await github.rest.repos.createCommitStatus({
@@ -102,7 +111,7 @@ jobs:
                 sha: context.payload.pull_request.head.sha,
                 state: 'success',
                 context: 'product-eng-approval',
-                description: `✅ Approved by @trufflesecurity/product-eng team member (${approver})`
+                description: `✅ Approved by @trufflesecurity/product-eng team member (${approverLogin})`
               });
             } else {
               await github.rest.repos.createCommitStatus({
